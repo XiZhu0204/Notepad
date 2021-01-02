@@ -19,8 +19,14 @@ Notepad::~Notepad()
 
 void Notepad::on_actionNew_triggered()
 {
+    if(!saved && !unsaved_dialog()) {
+        return;
+    }
     currentFile.clear();
+    setWindowTitle("Notepad");
     ui->textBox->setText(QString());
+    saved = true;
+
 }
 
 void Notepad::on_actionOpen_triggered()
@@ -79,11 +85,11 @@ void Notepad::on_actionSave_as_triggered()
 void Notepad::on_actionExit_triggered()
 {
     if (!saved) {
-       if (unsaved_dialog()) {
-           QApplication::quit();
-       } else {
-           return;
-       }
+        if (unsaved_dialog()) {
+            QApplication::quit();
+        } else {
+            return;
+        }
     } else {
         QApplication::quit();
     }
@@ -121,11 +127,11 @@ void Notepad::on_actionRedo_triggered()
 
 void Notepad::closeEvent(QCloseEvent *event) {
     if (!saved) {
-       if (unsaved_dialog()) {
-           event->accept();
-       } else {
-           event->ignore();
-       }
+        if (unsaved_dialog()) {
+            event->accept();
+        } else {
+            event->ignore();
+        }
     } else {
         QWidget::closeEvent(event);
     }
