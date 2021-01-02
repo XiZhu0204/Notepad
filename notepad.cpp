@@ -1,6 +1,8 @@
 #include "notepad.h"
 #include "ui_notepad.h"
 
+#include <QCloseEvent>
+
 Notepad::Notepad(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Notepad)
@@ -34,6 +36,7 @@ void Notepad::on_actionOpen_triggered()
     QTextStream in(&file);
     QString readText = in.readAll();
     ui->textBox->setText(readText);
+    saved = true;
     file.close();
 }
 
@@ -76,23 +79,11 @@ void Notepad::on_actionSave_as_triggered()
 void Notepad::on_actionExit_triggered()
 {
     if (!saved) {
-        QMessageBox unsavedMsg;
-        unsavedMsg.setText("You have unsaved changes.");
-        unsavedMsg.setInformativeText("Do you want to save your changes?");
-        unsavedMsg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        switch (unsavedMsg.exec()) {
-        case QMessageBox::Save:
-            Notepad::on_actionSave_triggered();
-            break;
-        case QMessageBox::Discard:
-            QApplication::quit();
-            break;
-        case QMessageBox::Cancel:
-            return;
-        default:
-            // should never be reached
-            break;
-        }
+       if (unsaved_dialog()) {
+           QApplication::quit();
+       } else {
+           return;
+       }
     } else {
         QApplication::quit();
     }
@@ -129,8 +120,32 @@ void Notepad::on_actionRedo_triggered()
 }
 
 void Notepad::closeEvent(QCloseEvent *event) {
-    Notepad::on_actionExit_triggered();
-    // below might not do anything
-    // TODO: Read up on the documentation to find difference, if any, between QApplication::quit() and QWidget::closeEvent(event)
-    QWidget::closeEvent(event);
+    if (!saved) {
+       if (unsaved_dialog()) {
+           event->accept();
+       } else {
+           event->ignore();
+       }
+    } else {
+        QWidget::closeEvent(event);
+    }
+}
+
+bool Notepad::unsaved_dialog() {
+    QMessageBox unsavedMsg;
+    unsavedMsg.setText("You have unsaved changes.");
+    unsavedMsg.setInformativeText("Do you want to save your changes?");
+    unsavedMsg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    switch (unsavedMsg.exec()) {
+    case QMessageBox::Save:
+        Notepad::on_actionSave_triggered();
+        return true;
+    case QMessageBox::Discard:
+        return true;
+    case QMessageBox::Cancel:
+        return false;
+    default:
+        // should never be reached
+        return false;
+    }
 }

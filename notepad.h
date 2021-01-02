@@ -45,6 +45,8 @@ private slots:
 
     void closeEvent(QCloseEvent *event);
 
+    bool unsaved_dialog();
+
 private:
     Ui::Notepad *ui;
     QString currentFile = "";
