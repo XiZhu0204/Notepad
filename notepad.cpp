@@ -33,11 +33,13 @@ void Notepad::on_actionOpen_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Open");
     QFile file(fileName);
-    currentFile = fileName;
     if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
         QMessageBox::warning(this, "Error", "Could not open file: " + file.errorString());
         return;
     }
+    int lastSlash = fileName.lastIndexOf('/');
+    fileName = fileName.remove(0, lastSlash + 1);
+    currentFile = fileName;
     setWindowTitle(fileName);
     QTextStream in(&file);
     QString readText = in.readAll();
@@ -73,6 +75,8 @@ void Notepad::on_actionSave_as_triggered()
         QMessageBox::warning(this, "Error", "Could not save: " + file.errorString());
         return;
     }
+    int lastSlash = fileName.lastIndexOf('/');
+    fileName = fileName.remove(0, lastSlash + 1);
     currentFile = fileName;
     setWindowTitle(fileName);
     QTextStream out(&file);
