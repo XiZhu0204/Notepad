@@ -25,9 +25,9 @@ private slots:
 
     void on_actionOpen_triggered();
 
-    void on_actionSave_triggered();
+    bool on_actionSave_triggered();
 
-    void on_actionSave_as_triggered();
+    bool on_actionSave_as_triggered();
 
     void on_actionExit_triggered();
 

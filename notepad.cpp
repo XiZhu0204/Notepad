@@ -48,32 +48,33 @@ void Notepad::on_actionOpen_triggered()
     file.close();
 }
 
-void Notepad::on_actionSave_triggered()
+bool Notepad::on_actionSave_triggered()
 {
     if(QFile::exists(currentFile)) {
         QFile file(currentFile);
         if (!file.open(QFile::WriteOnly | QFile::Text)) {
             QMessageBox::warning(this, "Error", "Could not save: " + file.errorString());
-            return;
+            return false;;
         }
         QTextStream out(&file);
         QString readText = ui->textBox->toPlainText();
         out << readText;
         saved = true;
         file.close();
+        return true;
     } else {
-        Notepad::on_actionSave_as_triggered();
+        return Notepad::on_actionSave_as_triggered();
     }
 
 }
 
-void Notepad::on_actionSave_as_triggered()
+bool Notepad::on_actionSave_as_triggered()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Save as") + ".txt";
+    QString fileName = QFileDialog::getSaveFileName(this, "Save as");
     QFile file(fileName);
     if (!file.open(QFile::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this, "Error", "Could not save: " + file.errorString());
-        return;
+        return false;
     }
     int lastSlash = fileName.lastIndexOf('/');
     fileName = fileName.remove(0, lastSlash + 1);
@@ -84,6 +85,7 @@ void Notepad::on_actionSave_as_triggered()
     out << readText;
     saved = true;
     file.close();
+    return true;
 }
 
 void Notepad::on_actionExit_triggered()
@@ -148,8 +150,11 @@ bool Notepad::unsaved_dialog() {
     unsavedMsg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     switch (unsavedMsg.exec()) {
     case QMessageBox::Save:
-        Notepad::on_actionSave_triggered();
-        return true;
+        if (Notepad::on_actionSave_triggered()) {
+            return true;
+        } else {
+            return false;
+        }
     case QMessageBox::Discard:
         return true;
     case QMessageBox::Cancel:
